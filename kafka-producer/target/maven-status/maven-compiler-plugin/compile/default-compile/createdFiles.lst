@@ -1,0 +1,5 @@
+com\example\producer\port\MessageProducerPort.class
+com\example\producer\dto\MessageRequest.class
+com\example\producer\controller\MessageController.class
+com\example\producer\KafkaProducerApplication.class
+com\example\producer\service\KafkaMessageProducer.class
