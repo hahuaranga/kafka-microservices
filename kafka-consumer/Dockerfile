@@ -1,5 +1,5 @@
-# Usamos una imagen base con JDK 21
-FROM eclipse-temurin:21.0.3_9-jdk-slim
+# Usamos una imagen base con JDK 21 de Eclipse Temurin
+FROM eclipse-temurin:21.0.4_7-jdk-slim
 
 # Copiamos el jar generado
 COPY target/kafka-consumer-1.0.0.jar app.jar
