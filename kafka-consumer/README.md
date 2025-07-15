@@ -2,8 +2,9 @@
 Minikube tiene su propio entorno de Docker, por lo que necesitas construir la imagen allí:
 
 ```
-eval $(minikube docker-env)
-docker build -t springboot-consumer:latest .
+docker build -t localhost:5000/springboot-consumer:latest .
+docker push localhost:5000/springboot-consumer:latest
+
 ```
 2.- Crea un Deployment y Service en Kubernetes
 
@@ -27,11 +28,12 @@ spec:
     spec:
       containers:
       - name: springboot-consumer
-        image: springboot-consumer:latest
-        imagePullPolicy: Never # Porque la imagen está local en Minikube
+        image: localhost:5000/springboot-consumer:latest
+        imagePullPolicy: Always
         ports:
-        - containerPort: 8080 # Puerto HTTP si aplica
+        - containerPort: 8080
 ---
+# Opcional: Service si necesitas exponer algo
 apiVersion: v1
 kind: Service
 metadata:
@@ -59,7 +61,7 @@ kubectl apply -f consumer-deployment.yaml
 ```
 kubectl get pods -n kafka
 ```
-5.- Y los logs:
+5.- Revisa los logs:
 
 ```
 kubectl logs <nombre-del-pod> -n kafka
