@@ -2,11 +2,13 @@ package com.example.consumer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 /**
  * Author: hahuaranga@indracompany.com
  * Created on: 14-07-2025 at 22:35:40
  * File: KafkaConsumerApplication.java
  */
+
 @SpringBootApplication
 public class KafkaConsumerApplication {
     public static void main(String[] args) {
