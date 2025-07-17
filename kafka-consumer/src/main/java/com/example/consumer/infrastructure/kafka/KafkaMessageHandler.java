@@ -3,6 +3,7 @@ package com.example.consumer.infrastructure.kafka;
 import com.example.consumer.core.domain.MessageProcessor;
 import com.example.consumer.infrastructure.input.MessageInputPort;
 import lombok.RequiredArgsConstructor;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,4 +22,9 @@ public class KafkaMessageHandler implements MessageInputPort {
     public void process(String message) {
         messageProcessor.handleMessage(message);
     }
+    
+    public void processWithMetadata(String payload, Map<String, String> headers) {
+    	messageProcessor.handleMessageWithMetadata(payload, headers);
+    }
+    
 }

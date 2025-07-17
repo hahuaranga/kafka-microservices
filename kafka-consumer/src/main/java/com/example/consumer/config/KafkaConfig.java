@@ -1,13 +1,16 @@
 package com.example.consumer.config;
 
 import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.config.SaslConfigs;
+import org.apache.kafka.common.config.TopicConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
@@ -67,4 +70,13 @@ public class KafkaConfig {
         
         return factory;
     }
+    
+    @Bean
+    NewTopic applicationTopic(KafkaProperties properties) {
+        return TopicBuilder.name(properties.topicName())
+                          .partitions(3)
+                          .replicas(2)
+                          .config(TopicConfig.RETENTION_MS_CONFIG, "604800000") // 7 días
+                          .build();
+    }    
 }
