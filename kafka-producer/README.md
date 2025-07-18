@@ -67,3 +67,8 @@ kubectl get pods -n kafka
 kubectl logs <nombre-del-pod> -n kafka
 ```
 
+6.- Exponer servicio al exterior
+
+```
+kubectl port-forward svc/springboot-producer 30100:8080 -n kafka
+```

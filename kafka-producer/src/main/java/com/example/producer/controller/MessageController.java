@@ -6,7 +6,6 @@ import com.example.producer.port.MessageProducerPort;
 import lombok.RequiredArgsConstructor;
 import java.util.Map;
 import java.util.UUID;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
