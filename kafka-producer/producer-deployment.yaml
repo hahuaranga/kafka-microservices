@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-producer
+  namespace: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot-producer
+  template:
+    metadata:
+      labels:
+        app: springboot-producer
+    spec:
+      containers:
+      - name: springboot-producer
+        image: localhost:5000/springboot-producer:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+---
+# Opcional: Service si necesitas exponer algo
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-producer
+  namespace: kafka
+spec:
+  selector:
+    app: springboot-producer
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

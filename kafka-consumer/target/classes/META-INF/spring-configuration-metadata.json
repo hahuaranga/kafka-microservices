@@ -9,7 +9,7 @@
       "name": "kafka.security",
       "type": "com.example.consumer.config.KafkaProperties$SecurityProperties",
       "sourceType": "com.example.consumer.config.KafkaProperties",
-      "sourceMethod": "public com.example.consumer.config.KafkaProperties.SecurityProperties getSecurity() "
+      "sourceMethod": "getSecurity()"
     }
   ],
   "properties": [
