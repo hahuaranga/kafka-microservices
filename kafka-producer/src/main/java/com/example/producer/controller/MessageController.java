@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -43,4 +44,19 @@ public class MessageController {
             headers
         ).thenReturn(ResponseEntity.accepted().build());
     }
+    
+    @PostMapping("/simple")
+    public Mono<ResponseEntity<Void>> sendSimpleMessage(
+        @RequestBody String message,
+        @RequestParam(required = false) String key) {
+        
+        // Usar "default-key" si no se proporciona key
+        String messageKey = (key != null) ? key : "default-key";
+        
+        return messageProducer.sendMessage(
+            kafkaProperties.topic(),
+            messageKey,
+            message
+        ).thenReturn(ResponseEntity.accepted().build());
+    }    
 }
