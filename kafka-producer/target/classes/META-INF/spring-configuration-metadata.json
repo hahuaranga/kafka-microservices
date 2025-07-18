@@ -1,0 +1,101 @@
+{
+  "groups": [
+    {
+      "name": "kafka",
+      "type": "com.example.producer.config.KafkaConfigProperties",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties"
+    },
+    {
+      "name": "kafka.producer",
+      "type": "com.example.producer.config.KafkaConfigProperties$Producer",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties",
+      "sourceMethod": "producer()"
+    },
+    {
+      "name": "kafka.security",
+      "type": "com.example.producer.config.KafkaConfigProperties$Security",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties",
+      "sourceMethod": "security()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "kafka.producer.acks",
+      "type": "java.lang.String",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties$Producer"
+    },
+    {
+      "name": "kafka.producer.batch-size",
+      "type": "java.lang.Integer",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties$Producer",
+      "defaultValue": 0
+    },
+    {
+      "name": "kafka.producer.bootstrap-servers",
+      "type": "java.lang.String",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties$Producer"
+    },
+    {
+      "name": "kafka.producer.buffer-memory",
+      "type": "java.lang.Integer",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties$Producer",
+      "defaultValue": 0
+    },
+    {
+      "name": "kafka.producer.compression-type",
+      "type": "java.lang.String",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties$Producer"
+    },
+    {
+      "name": "kafka.producer.key-serializer",
+      "type": "java.lang.String",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties$Producer"
+    },
+    {
+      "name": "kafka.producer.linger-ms",
+      "type": "java.lang.Integer",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties$Producer",
+      "defaultValue": 0
+    },
+    {
+      "name": "kafka.producer.retries",
+      "type": "java.lang.Integer",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties$Producer",
+      "defaultValue": 0
+    },
+    {
+      "name": "kafka.producer.value-serializer",
+      "type": "java.lang.String",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties$Producer"
+    },
+    {
+      "name": "kafka.security.mechanism",
+      "type": "java.lang.String",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties$Security"
+    },
+    {
+      "name": "kafka.security.password",
+      "type": "java.lang.String",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties$Security"
+    },
+    {
+      "name": "kafka.security.protocol",
+      "type": "java.lang.String",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties$Security"
+    },
+    {
+      "name": "kafka.security.username",
+      "type": "java.lang.String",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties$Security"
+    },
+    {
+      "name": "kafka.topic",
+      "type": "java.lang.String",
+      "sourceType": "com.example.producer.config.KafkaConfigProperties"
+    }
+  ],
+  "hints": [],
+  "ignored": {
+    "properties": []
+  }
+}

@@ -71,6 +71,7 @@ public class KafkaConfig {
         return factory;
     }
     
+    // Solo para validacion
     @Bean
     NewTopic applicationTopic(KafkaProperties properties) {
         return TopicBuilder.name(properties.topicName())

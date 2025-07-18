@@ -1,5 +1,10 @@
 com\example\producer\port\MessageProducerPort.class
+com\example\producer\config\KafkaConfigProperties$Producer.class
 com\example\producer\dto\MessageRequest.class
 com\example\producer\controller\MessageController.class
 com\example\producer\KafkaProducerApplication.class
 com\example\producer\service\KafkaMessageProducer.class
+com\example\producer\config\KafkaConfigProperties$Security.class
+com\example\producer\config\KafkaConfigProperties.class
+com\example\producer\config\KafkaProducerConfig.class
+META-INF\spring-configuration-metadata.json
