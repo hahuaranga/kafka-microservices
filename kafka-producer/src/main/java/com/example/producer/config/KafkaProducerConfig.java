@@ -50,8 +50,8 @@ public class KafkaProducerConfig {
         }
         
         // Configuración adicional para headers
-        props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, 
-            "org.springframework.kafka.support.LoggingProducerInterceptor");        
+//        props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, 
+//            "org.springframework.kafka.support.LoggingProducerInterceptor");        
         
         return SenderOptions.create(props);
     }
