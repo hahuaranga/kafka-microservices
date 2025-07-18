@@ -26,9 +26,8 @@ public class KafkaConsumer {
 
 	private final KafkaMessageHandler handler;
 
-	private static final String TOPIC_EXPRESSION = "#{@kafkaProperties.topicName()}";
 
-	@KafkaListener(topics = TOPIC_EXPRESSION)
+	@KafkaListener(topics = "${kafka.topic-name}")
 	public void consume(Message<String> message) {
 		
 		// Procesamiento básico sin headers
@@ -40,7 +39,7 @@ public class KafkaConsumer {
 		}
 	}
 
-	@KafkaListener(topics = TOPIC_EXPRESSION)
+	@KafkaListener(topics = "${kafka.topic-name}")
 	public void consumeWithHeaders(Message<String> message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
 			@Header(KafkaHeaders.RECEIVED_TIMESTAMP) Long timestamp) {
 
