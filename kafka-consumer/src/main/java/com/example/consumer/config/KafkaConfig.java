@@ -6,7 +6,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.TopicConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -14,6 +13,7 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import lombok.RequiredArgsConstructor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,17 +24,20 @@ import java.util.Map;
  */
 
 @Configuration
-@EnableConfigurationProperties(KafkaProperties.class)
+//@EnableConfigurationProperties(KafkaProperties.class)
+@RequiredArgsConstructor
 public class KafkaConfig {
 
+	private final KafkaProperties kafkaProperties;
+	
     @Bean
-    ConsumerFactory<String, String> consumerFactory(KafkaProperties properties) {
+    ConsumerFactory<String, String> consumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         
         // Basic configuration
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.bootstrapServers());
-        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, properties.groupId());
-        configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, properties.autoOffsetReset());
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaProperties.getGroupId());
+        configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaProperties.getAutoOffsetReset());
         
         // Deserializers with error handling
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
@@ -43,13 +46,13 @@ public class KafkaConfig {
         configProps.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, StringDeserializer.class);
         
         // Security configuration
-        if (properties.security() != null) {
-            configProps.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, properties.security().protocol());
-            configProps.put(SaslConfigs.SASL_MECHANISM, properties.security().mechanism());
+        if (kafkaProperties.getSecurity() != null) {
+            configProps.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, kafkaProperties.getSecurity().getProtocol());
+            configProps.put(SaslConfigs.SASL_MECHANISM, kafkaProperties.getSecurity().getMechanism());
             configProps.put(SaslConfigs.SASL_JAAS_CONFIG, String.format(
                 "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";",
-                properties.security().username(),
-                properties.security().password()
+                kafkaProperties.getSecurity().getUsername(),
+                kafkaProperties.getSecurity().getPassword()
             ));
         }
         
@@ -74,7 +77,7 @@ public class KafkaConfig {
     // Solo para validacion
     @Bean
     NewTopic applicationTopic(KafkaProperties properties) {
-        return TopicBuilder.name(properties.topicName())
+        return TopicBuilder.name(kafkaProperties.getTopicName())
                           .partitions(3)
                           .replicas(2)
                           .config(TopicConfig.RETENTION_MS_CONFIG, "604800000") // 7 días

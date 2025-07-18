@@ -2,9 +2,7 @@ package com.example.consumer.core.service;
 
 import com.example.consumer.core.domain.MessageProcessor;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.Map;
-
 import org.springframework.stereotype.Service;
 
 /**

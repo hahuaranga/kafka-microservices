@@ -7,6 +7,7 @@ import java.util.Map;
  * Created on: 15-07-2025 at 23:19:44
  * File: MessageProcessor.java
  */
+
 /**
  * Interfaz que define el contrato para procesamiento de mensajes en el dominio.
  * Representa la capacidad del sistema para manejar mensajes entrantes.
