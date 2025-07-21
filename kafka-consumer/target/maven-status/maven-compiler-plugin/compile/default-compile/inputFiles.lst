@@ -1,8 +1,0 @@
-D:\WORKSPACES\workspace_eclipse_new_latest\kafka-microservices\kafka-consumer\src\main\java\com\example\consumer\config\KafkaConfig.java
-D:\WORKSPACES\workspace_eclipse_new_latest\kafka-microservices\kafka-consumer\src\main\java\com\example\consumer\config\KafkaProperties.java
-D:\WORKSPACES\workspace_eclipse_new_latest\kafka-microservices\kafka-consumer\src\main\java\com\example\consumer\core\domain\MessageProcessor.java
-D:\WORKSPACES\workspace_eclipse_new_latest\kafka-microservices\kafka-consumer\src\main\java\com\example\consumer\core\service\DomainMessageService.java
-D:\WORKSPACES\workspace_eclipse_new_latest\kafka-microservices\kafka-consumer\src\main\java\com\example\consumer\infrastructure\input\MessageInputPort.java
-D:\WORKSPACES\workspace_eclipse_new_latest\kafka-microservices\kafka-consumer\src\main\java\com\example\consumer\infrastructure\kafka\KafkaConsumer.java
-D:\WORKSPACES\workspace_eclipse_new_latest\kafka-microservices\kafka-consumer\src\main\java\com\example\consumer\infrastructure\kafka\KafkaMessageHandler.java
-D:\WORKSPACES\workspace_eclipse_new_latest\kafka-microservices\kafka-consumer\src\main\java\com\example\consumer\KafkaConsumerApplication.java
