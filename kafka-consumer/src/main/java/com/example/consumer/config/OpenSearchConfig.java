@@ -24,7 +24,7 @@ import java.net.URISyntaxException;
 /**
  * Author: hahuaranga@indracompany.com
  * Created on: 22-07-2025 at 09:39:55
- * File: OpenSearchAdapter.java
+ * File: OpenSearchConfig.java
  */
 
 @Configuration

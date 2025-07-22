@@ -7,7 +7,7 @@ import lombok.Data;
 /**
  * Author: hahuaranga@indracompany.com
  * Created on: 15-07-2025 at 23:19:44
- * File: MessageProcessor.java
+ * File: KafkaProperties.java
  */
 
 @Data
