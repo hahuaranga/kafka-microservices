@@ -40,7 +40,7 @@ public class OpenSearchAdapter implements OpenSearchOutputPort {
                 .build();
 
             IndexResponse response = client.index(request);
-            System.out.println("Document indexed with id: " + response.id());
+            log.info("Document indexed with id: " + response.id());
         } catch (IOException | OpenSearchException e) {
             throw new RuntimeException("Failed to index document synchronously", e);
         }
@@ -56,9 +56,9 @@ public class OpenSearchAdapter implements OpenSearchOutputPort {
                     .build();
 
                 IndexResponse response = client.index(request);
-                System.out.println("Document indexed async with id: " + response.id());
+                log.info("Document indexed async with id: " + response.id());
             } catch (IOException | OpenSearchException e) {
-                System.err.println("Failed to index document asynchronously: " + e.getMessage());
+            	log.error("Failed to index document asynchronously: " + e.getMessage());
             }
         });
     }
@@ -74,9 +74,10 @@ public class OpenSearchAdapter implements OpenSearchOutputPort {
                 client.indices().create(new CreateIndexRequest.Builder()
                     .index(properties.getIndexName())
                     .build());
-                System.out.println("Index created: " + properties.getIndexName());
+                log.info("Index created: " + properties.getIndexName());
             }
         } catch (IOException | OpenSearchException e) {
+        	log.error("Failed to create index {} after retries", properties.getIndexName(), e);
             throw new RuntimeException("Failed to check/create index", e);
         }
     }
