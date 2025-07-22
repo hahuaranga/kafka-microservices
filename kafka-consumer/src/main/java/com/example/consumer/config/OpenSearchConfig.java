@@ -52,14 +52,16 @@ public class OpenSearchConfig {
 
         // Configuración de credenciales
         final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(
-            new AuthScope(host),
-            new UsernamePasswordCredentials(
-                properties.getUsername(), 
-                properties.getPassword().toCharArray()
-            )
-        );
-
+        
+        if ("basicauth".equalsIgnoreCase(properties.getAuthType())) {
+	        credentialsProvider.setCredentials(
+	            new AuthScope(host),
+	            new UsernamePasswordCredentials(
+	                properties.getUsername(), 
+	                properties.getPassword().toCharArray()
+	            )
+	        );
+        }
         // Configuración SSL/TLS
         final SSLContext sslContext = SSLContextBuilder
             .create()

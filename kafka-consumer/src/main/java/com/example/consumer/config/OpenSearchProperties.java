@@ -22,6 +22,8 @@ public class OpenSearchProperties {
     private String truststorePath;
     private String truststorePassword;
     
+    private String authType = "basicauth"; // Valor por defecto
+    
     @DurationUnit(ChronoUnit.SECONDS)
     private Duration connectionTimeout = Duration.ofSeconds(30);
     
