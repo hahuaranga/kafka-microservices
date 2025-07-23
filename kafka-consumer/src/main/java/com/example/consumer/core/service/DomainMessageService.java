@@ -31,8 +31,8 @@ public class DomainMessageService implements MessageProcessor {
         // - Persistencia
     	
     	// Integracion con OpenSearch
-        openSearchOutputPort.createIndexIfNotExists();
-        openSearchOutputPort.indexSync(message);
+        //openSearchOutputPort.createIndexIfNotExists();
+        //openSearchOutputPort.indexSync(message);
     }
     
     @Override
@@ -41,7 +41,7 @@ public class DomainMessageService implements MessageProcessor {
         // Lógica que usa metadatos
         
         // Integracion con OpenSearch
-        openSearchOutputPort.createIndexIfNotExists();
-        openSearchOutputPort.indexAsync(payload);
+        //openSearchOutputPort.createIndexIfNotExists();
+        //openSearchOutputPort.indexAsync(payload);
     }    
 }
