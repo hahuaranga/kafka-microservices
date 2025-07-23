@@ -9,6 +9,7 @@ import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBu
 import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
+import org.apache.hc.core5.http2.HttpVersionPolicy;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.hc.core5.util.Timeout;
 import org.opensearch.client.opensearch.OpenSearchClient;
@@ -71,7 +72,9 @@ public class OpenSearchConfig {
         // Construcción del cliente
         final ApacheHttpClient5TransportBuilder builder = ApacheHttpClient5TransportBuilder.builder(host);
         builder.setHttpClientConfigCallback(httpClientBuilder -> {
-        	
+            HttpVersionPolicy x;
+			// Deshabilitar HTTP/2
+            httpClientBuilder.setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_1);
             final TlsStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
                 .setSslContext(sslContext)
                 .build();
