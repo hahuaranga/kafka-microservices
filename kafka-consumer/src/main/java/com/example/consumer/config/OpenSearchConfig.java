@@ -71,6 +71,7 @@ public class OpenSearchConfig {
         // Construcción del cliente
         final ApacheHttpClient5TransportBuilder builder = ApacheHttpClient5TransportBuilder.builder(host);
         builder.setHttpClientConfigCallback(httpClientBuilder -> {
+        	
             final TlsStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
                 .setSslContext(sslContext)
                 .build();
