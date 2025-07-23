@@ -33,14 +33,28 @@
 
 			<dependency>
 				<groupId>org.opensearch.client</groupId>
-				<artifactId>opensearch-java</artifactId>
-				<version>3.0.0</version>
+				<artifactId>opensearch-rest-client</artifactId>
+				<version>2.19.3</version>
 			</dependency>
 
 			<dependency>
-				<groupId>org.apache.httpcomponents.client5</groupId>
-				<artifactId>httpclient5</artifactId>
-				<version>5.2.1</version>
+				<groupId>org.opensearch.client</groupId>
+				<artifactId>opensearch-java</artifactId>
+				<version>2.6.0</version>
+			</dependency>
+
+			<!-- HttpClient principal (sincrónico) -->
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.5.13</version> <!-- Versión estable recomendada -->
+			</dependency>
+
+			<!-- HttpClient asíncrono (para HttpAsyncClientBuilder) -->
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpasyncclient</artifactId>
+				<version>4.1.5</version> <!-- Versión compatible con httpclient 4.5.x -->
 			</dependency>
 
 		</dependencies>

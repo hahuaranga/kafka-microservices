@@ -15,18 +15,19 @@ import org.springframework.boot.convert.DurationUnit;
 @Data
 @ConfigurationProperties(prefix = "opensearch")
 public class OpenSearchProperties {
-	private String url;
+    private String url;
     private String username;
     private String password;
     private String indexName;
-    private String truststorePath;
-    private String truststorePassword;
+    private int maxConnectionsPerRoute = 10;
+    private int maxConnectionsTotal = 30;
     
-    private String authType = "basicauth"; // Valor por defecto
+    @DurationUnit(ChronoUnit.MILLIS)
+    private Duration connectionTimeout = Duration.ofSeconds(5);
     
-    @DurationUnit(ChronoUnit.SECONDS)
-    private Duration connectionTimeout = Duration.ofSeconds(30);
+    @DurationUnit(ChronoUnit.MILLIS)
+    private Duration socketTimeout = Duration.ofSeconds(10);
     
-    @DurationUnit(ChronoUnit.SECONDS)
-    private Duration socketTimeout = Duration.ofSeconds(30);    
+    @DurationUnit(ChronoUnit.MILLIS)
+    private Duration connectionRequestTimeout = Duration.ofSeconds(5);    
 }

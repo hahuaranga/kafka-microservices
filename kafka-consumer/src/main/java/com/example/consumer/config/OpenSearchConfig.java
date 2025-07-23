@@ -2,19 +2,17 @@ package com.example.consumer.config;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import javax.net.ssl.SSLContext;
-import org.apache.hc.client5.http.auth.AuthScope;
-import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
-import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
-import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
-import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
-import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.opensearch.client.RestClient;
+import org.opensearch.client.RestClientBuilder;
+import org.opensearch.client.json.jackson.JacksonJsonpMapper;
 import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.transport.OpenSearchTransport;
-import org.opensearch.client.transport.httpclient5.ApacheHttpClient5TransportBuilder;
+import org.opensearch.client.transport.rest_client.RestClientTransport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import lombok.RequiredArgsConstructor;
@@ -31,96 +29,56 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class OpenSearchConfig {
 
-    private final OpenSearchProperties properties;
-
+	private final OpenSearchProperties properties;
+	
     @Bean
-    OpenSearchClient openSearchClient() throws Exception {
-    	
-    	log.debug("Processing openSearchClient ...");
-    	
-        // 1. Configuración SSL
-    	log.debug("Executing configureSSL ...");
-    	configureSSL();
+    OpenSearchClient openSearchClient() throws URISyntaxException {
+        log.info("Configurando cliente OpenSearch para {}", properties.getUrl());
 
-        // 2. Obtener host desde URL
-    	log.debug("Executing getHostByUrl ...");
-        final HttpHost host = getHostByUrl(properties.getUrl());
-        
-        // --------------------------------
-        
-        final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(new AuthScope(host), new UsernamePasswordCredentials(properties.getUsername(), properties.getPassword().toCharArray()));
-        
-        final SSLContext sslcontext = SSLContextBuilder
-        	      .create()
-        	      .loadTrustMaterial(null, (chains, authType) -> true)
-        	      .build();
-        
-        final ApacheHttpClient5TransportBuilder builder = ApacheHttpClient5TransportBuilder.builder(host);
-        builder.setHttpClientConfigCallback(httpClientBuilder -> {
-            // Configuración TLS (sin HTTP/2)
-            TlsStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
-                .setSslContext(sslcontext)
-                // ---> FORZAR HTTP/1.1 <---
-                .setTlsVersions("TLSv1.2", "TLSv1.3")  // Evita ALPN (usado en HTTP/2)
-                .build();
-
-            PoolingAsyncClientConnectionManager cm = PoolingAsyncClientConnectionManagerBuilder
-                .create()
-                .setTlsStrategy(tlsStrategy)
-                .build();
-
-            // Configuración final del cliente
-            return httpClientBuilder
-                .setDefaultCredentialsProvider(credentialsProvider)
-                .setConnectionManager(cm)
-                // ---> DESHABILITAR CARACTERÍSTICAS AVANZADAS <---
-                .disableConnectionState()  // Evita negociación de protocolos
-                .disableCookieManagement()
-                .disableAuthCaching();
-        });        
-        
-//        final ApacheHttpClient5TransportBuilder builder = ApacheHttpClient5TransportBuilder.builder(host);
-//        builder.setHttpClientConfigCallback(httpClientBuilder -> {
-//          final TlsStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
-//            .setSslContext(sslcontext)
-//            // See https://issues.apache.org/jira/browse/HTTPCLIENT-2219
-//            .setTlsDetailsFactory(new Factory<SSLEngine, TlsDetails>() {
-//              @Override
-//              public TlsDetails create(final SSLEngine sslEngine) {
-//                return new TlsDetails(sslEngine.getSession(), sslEngine.getApplicationProtocol());
-//              }
-//            })
-//            .build();
-//
-//          final PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder
-//            .create()
-//            .setTlsStrategy(tlsStrategy)
-//            .build();
-//
-//          return httpClientBuilder
-//            .setDefaultCredentialsProvider(credentialsProvider)
-//            .setConnectionManager(connectionManager);
-//        });
-        
-        final OpenSearchTransport transport = builder.build();
-        return new OpenSearchClient(transport);
-    }
-
-    private void configureSSL() {
-        if (properties.getTruststorePath() != null && !properties.getTruststorePath().isEmpty()) {
-            System.setProperty("javax.net.ssl.trustStore", properties.getTruststorePath());
-            System.setProperty("javax.net.ssl.trustStorePassword", properties.getTruststorePassword());
-        }
-    }
-
-    private HttpHost getHostByUrl(String url) throws URISyntaxException {
-        URI uri = new URI(url);
-        return new HttpHost(
-            uri.getScheme(),
+        // 1. Parsear URL
+        URI uri = new URI(properties.getUrl());
+        HttpHost host = new HttpHost(
             uri.getHost(),
-            uri.getPort() != -1 ? uri.getPort() : 
-                ("https".equals(uri.getScheme()) ? 443 : 80)
+            uri.getPort(),
+            uri.getScheme()
+        );
+
+        // 2. Configurar autenticación básica
+        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(
+            new AuthScope(host),
+            new UsernamePasswordCredentials(
+                properties.getUsername(),
+                properties.getPassword()
+            )
+        );
+
+        // 3. Configurar timeouts
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectTimeout((int) properties.getConnectionTimeout().toMillis())
+                .setSocketTimeout((int) properties.getSocketTimeout().toMillis())
+                .setConnectionRequestTimeout((int) properties.getConnectionRequestTimeout().toMillis())
+                .build();
+
+        // 4. Construir cliente REST con configuración completa
+        RestClient restClient = RestClient.builder(host)
+            .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
+                @Override
+                public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpClientBuilder) {
+                    return httpClientBuilder
+                        .setDefaultCredentialsProvider(credentialsProvider)
+                        .setDefaultRequestConfig(requestConfig)
+                        .setMaxConnPerRoute(properties.getMaxConnectionsPerRoute())
+                        .setMaxConnTotal(properties.getMaxConnectionsTotal());
+                }
+            })
+            .build();
+
+        // 5. Crear cliente OpenSearch
+        return new OpenSearchClient(
+            new RestClientTransport(restClient, new JacksonJsonpMapper())
         );
     }
+	
+    
 }
