@@ -1,17 +1,20 @@
 package com.example.consumer.config;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
+import org.apache.hc.core5.function.Factory;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
+import org.apache.hc.core5.reactor.ssl.TlsDetails;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
-import org.apache.hc.core5.util.Timeout;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.transport.OpenSearchTransport;
 import org.opensearch.client.transport.httpclient5.ApacheHttpClient5TransportBuilder;
@@ -19,9 +22,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import javax.net.ssl.SSLContext;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * Author: hahuaranga@indracompany.com
@@ -48,19 +48,41 @@ public class OpenSearchConfig {
         // 2. Obtener host desde URL
     	log.debug("Executing getHostByUrl ...");
         final HttpHost host = getHostByUrl(properties.getUrl());
+        
+        // --------------------------------
+        
+        final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(new AuthScope(host), new UsernamePasswordCredentials(properties.getUsername(), properties.getPassword().toCharArray()));
+        
+        final SSLContext sslcontext = SSLContextBuilder
+        	      .create()
+        	      .loadTrustMaterial(null, (chains, authType) -> true)
+        	      .build();
+        
+        final ApacheHttpClient5TransportBuilder builder = ApacheHttpClient5TransportBuilder.builder(host);
+        builder.setHttpClientConfigCallback(httpClientBuilder -> {
+          final TlsStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
+            .setSslContext(sslcontext)
+            // See https://issues.apache.org/jira/browse/HTTPCLIENT-2219
+            .setTlsDetailsFactory(new Factory<SSLEngine, TlsDetails>() {
+              @Override
+              public TlsDetails create(final SSLEngine sslEngine) {
+                return new TlsDetails(sslEngine.getSession(), sslEngine.getApplicationProtocol());
+              }
+            })
+            .build();
 
-        // 3. Configurar el cliente HTTP
-        log.debug("Executing transport ...");
-        final OpenSearchTransport transport = ApacheHttpClient5TransportBuilder.builder(host)
-        	    .setHttpClientConfigCallback(httpClientBuilder -> {
-        	        try {
-        	            return configureHttpClient(httpClientBuilder);
-        	        } catch (Exception e) {
-        	            throw new RuntimeException("Failed to configure HTTP client", e);
-        	        }
-        	    })
-        	    .build();
+          final PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder
+            .create()
+            .setTlsStrategy(tlsStrategy)
+            .build();
 
+          return httpClientBuilder
+            .setDefaultCredentialsProvider(credentialsProvider)
+            .setConnectionManager(connectionManager);
+        });
+        
+        final OpenSearchTransport transport = builder.build();
         return new OpenSearchClient(transport);
     }
 
@@ -69,51 +91,6 @@ public class OpenSearchConfig {
             System.setProperty("javax.net.ssl.trustStore", properties.getTruststorePath());
             System.setProperty("javax.net.ssl.trustStorePassword", properties.getTruststorePassword());
         }
-    }
-
-    private HttpAsyncClientBuilder configureHttpClient(HttpAsyncClientBuilder httpClientBuilder) throws Exception {
-        // Configuración de credenciales
-        if ("basicauth".equalsIgnoreCase(properties.getAuthType())) {
-            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(
-                new AuthScope(null, -1), // AuthScope amplio
-                new UsernamePasswordCredentials(
-                    properties.getUsername(), 
-                    properties.getPassword().toCharArray()
-                )
-            );
-            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-        }
-
-        // Configuración TLS (sin HTTP/2)
-        SSLContext sslContext = SSLContextBuilder.create()
-            .loadTrustMaterial(null, (chains, authType) -> true)
-            .build();
-
-        TlsStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
-            .setSslContext(sslContext)
-            // Forzar TLSv1.2 (compatible con OpenSearch)
-            .setTlsVersions(new String[]{"TLSv1.2"}) 
-            .build();
-
-        // Configuración del connection manager
-        PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
-            .setTlsStrategy(tlsStrategy)
-            .build();
-
-        // Configuración de timeouts
-        RequestConfig requestConfig = RequestConfig.custom()
-            .setConnectionRequestTimeout(Timeout.of(properties.getConnectionTimeout()))
-            .setResponseTimeout(Timeout.of(properties.getSocketTimeout()))
-            .build();
-
-        return httpClientBuilder
-            .setConnectionManager(connectionManager)
-            .setDefaultRequestConfig(requestConfig)
-            // Deshabilitar características avanzadas que podrían usar HTTP/2
-            .disableCookieManagement()
-            .disableAuthCaching()
-            .disableConnectionState();
     }
 
     private HttpHost getHostByUrl(String url) throws URISyntaxException {
