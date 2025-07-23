@@ -33,6 +33,7 @@ public class OpenSearchAdapter implements OpenSearchOutputPort {
 
     @Override
     public void indexSync(String message) {
+    	log.debug("Processing indexSync ...");
         try {
             IndexRequest<Map<String, String>> request = new IndexRequest.Builder<Map<String, String>>()
                 .index(properties.getIndexName())
@@ -48,6 +49,7 @@ public class OpenSearchAdapter implements OpenSearchOutputPort {
     
     @Override
     public void indexAsync(String message) {
+    	log.debug("Processing indexAsync ...");
         CompletableFuture.runAsync(() -> {
             try {
                 IndexRequest<Map<String, String>> request = new IndexRequest.Builder<Map<String, String>>()
@@ -65,6 +67,7 @@ public class OpenSearchAdapter implements OpenSearchOutputPort {
     
     @Override
     public void createIndexIfNotExists() {
+    	log.debug("Processing createIndexIfNotExists ...");
         try {
             boolean exists = client.indices().exists(new ExistsRequest.Builder()
                 .index(properties.getIndexName())

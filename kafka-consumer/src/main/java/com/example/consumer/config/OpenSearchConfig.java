@@ -17,7 +17,12 @@ import org.opensearch.client.transport.OpenSearchTransport;
 import org.opensearch.client.transport.httpclient5.ApacheHttpClient5TransportBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.example.consumer.core.service.DomainMessageService;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import javax.net.ssl.SSLContext;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,6 +33,7 @@ import java.net.URISyntaxException;
  * File: OpenSearchConfig.java
  */
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class OpenSearchConfig {
@@ -36,13 +42,19 @@ public class OpenSearchConfig {
 
     @Bean
     OpenSearchClient openSearchClient() throws Exception {
+    	
+    	log.debug("Processing openSearchClient ...");
+    	
         // 1. Configuración SSL
-        configureSSL();
+    	log.debug("Executing configureSSL ...");
+    	configureSSL();
 
         // 2. Obtener host desde URL
+    	log.debug("Executing getHostByUrl ...");
         final HttpHost host = getHostByUrl(properties.getUrl());
 
         // 3. Configurar el cliente HTTP
+        log.debug("Executing transport ...");
         final OpenSearchTransport transport = ApacheHttpClient5TransportBuilder.builder(host)
         	    .setHttpClientConfigCallback(httpClientBuilder -> {
         	        try {
