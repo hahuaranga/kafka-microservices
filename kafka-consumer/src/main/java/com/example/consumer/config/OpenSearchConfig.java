@@ -3,17 +3,14 @@ package com.example.consumer.config;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
-import org.apache.hc.core5.function.Factory;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
-import org.apache.hc.core5.reactor.ssl.TlsDetails;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.transport.OpenSearchTransport;
@@ -61,26 +58,50 @@ public class OpenSearchConfig {
         
         final ApacheHttpClient5TransportBuilder builder = ApacheHttpClient5TransportBuilder.builder(host);
         builder.setHttpClientConfigCallback(httpClientBuilder -> {
-          final TlsStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
-            .setSslContext(sslcontext)
-            // See https://issues.apache.org/jira/browse/HTTPCLIENT-2219
-            .setTlsDetailsFactory(new Factory<SSLEngine, TlsDetails>() {
-              @Override
-              public TlsDetails create(final SSLEngine sslEngine) {
-                return new TlsDetails(sslEngine.getSession(), sslEngine.getApplicationProtocol());
-              }
-            })
-            .build();
+            // Configuración TLS (sin HTTP/2)
+            TlsStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
+                .setSslContext(sslcontext)
+                // ---> FORZAR HTTP/1.1 <---
+                .setTlsVersions("TLSv1.2", "TLSv1.3")  // Evita ALPN (usado en HTTP/2)
+                .build();
 
-          final PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder
-            .create()
-            .setTlsStrategy(tlsStrategy)
-            .build();
+            PoolingAsyncClientConnectionManager cm = PoolingAsyncClientConnectionManagerBuilder
+                .create()
+                .setTlsStrategy(tlsStrategy)
+                .build();
 
-          return httpClientBuilder
-            .setDefaultCredentialsProvider(credentialsProvider)
-            .setConnectionManager(connectionManager);
-        });
+            // Configuración final del cliente
+            return httpClientBuilder
+                .setDefaultCredentialsProvider(credentialsProvider)
+                .setConnectionManager(cm)
+                // ---> DESHABILITAR CARACTERÍSTICAS AVANZADAS <---
+                .disableConnectionState()  // Evita negociación de protocolos
+                .disableCookieManagement()
+                .disableAuthCaching();
+        });        
+        
+//        final ApacheHttpClient5TransportBuilder builder = ApacheHttpClient5TransportBuilder.builder(host);
+//        builder.setHttpClientConfigCallback(httpClientBuilder -> {
+//          final TlsStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
+//            .setSslContext(sslcontext)
+//            // See https://issues.apache.org/jira/browse/HTTPCLIENT-2219
+//            .setTlsDetailsFactory(new Factory<SSLEngine, TlsDetails>() {
+//              @Override
+//              public TlsDetails create(final SSLEngine sslEngine) {
+//                return new TlsDetails(sslEngine.getSession(), sslEngine.getApplicationProtocol());
+//              }
+//            })
+//            .build();
+//
+//          final PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder
+//            .create()
+//            .setTlsStrategy(tlsStrategy)
+//            .build();
+//
+//          return httpClientBuilder
+//            .setDefaultCredentialsProvider(credentialsProvider)
+//            .setConnectionManager(connectionManager);
+//        });
         
         final OpenSearchTransport transport = builder.build();
         return new OpenSearchClient(transport);
