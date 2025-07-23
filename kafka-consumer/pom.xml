@@ -46,7 +46,13 @@
 		<!-- OpenSearch -->
 		<dependency>
 			<groupId>org.opensearch.client</groupId>
-			<artifactId>opensearch-java</artifactId>		
+			<artifactId>opensearch-java</artifactId>	
+		    <exclusions>
+		        <exclusion>
+		            <groupId>org.apache.httpcomponents.core5</groupId>
+		            <artifactId>httpcore5-h2</artifactId>
+		        </exclusion>
+		    </exclusions>				
 		</dependency>
 
 		<!-- httpclient5 -->
