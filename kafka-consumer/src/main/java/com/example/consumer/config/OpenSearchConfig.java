@@ -39,41 +39,31 @@ public class OpenSearchConfig {
 	
     @Bean
     OpenSearchClient openSearchClient() throws URISyntaxException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-        log.info("Configurando cliente OpenSearch para {}", properties.getUrl());
+        log.info("Configurando cliente OpenSearch para {}", properties.getUrl());  	
         
-        // 1. Parsear URL
-        URI uri = new URI(properties.getUrl());
-        HttpHost host = new HttpHost(
-            uri.getHost(),
-            uri.getPort(),
-            uri.getScheme()
+        RestClient restClient = getRestClient(
+        		getHttpHost(), 							// Parsear URL
+        		getCredentialProvider(getHttpHost()), 	// Configurar autenticación básica
+        		getRequestConfig(), 					// Configurar timeouts
+        		getSslContext()							// Construir cliente REST con configuración completa y aceptar cualquier certificado
+        		);
+
+        // Crear cliente OpenSearch
+        return new OpenSearchClient(
+            new RestClientTransport(restClient, new JacksonJsonpMapper())
         );
+    }
 
-        // 2. Configurar autenticación básica
-        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(
-            new AuthScope(host),
-            new UsernamePasswordCredentials(
-                properties.getUsername(),
-                properties.getPassword()
-            )
-        );
-
-        // 3. Configurar timeouts
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout((int) properties.getConnectionTimeout().toMillis())
-                .setSocketTimeout((int) properties.getSocketTimeout().toMillis())
-                .setConnectionRequestTimeout((int) properties.getConnectionRequestTimeout().toMillis())
-                .build();
-
-        // 4. Construir cliente REST con configuración completa
-        SSLContext sslContext = SSLContextBuilder
-                .create()
-                .loadTrustMaterial((chain, authType) -> true) // Acepta cualquier certificado (¡Cuidado en producción!)
-                .build();
-    	
-        
-        RestClient restClient = RestClient.builder(host)
+	/**
+	 * @param host
+	 * @param credentialsProvider
+	 * @param requestConfig
+	 * @param sslContext
+	 * @return
+	 */
+	private RestClient getRestClient(HttpHost host, BasicCredentialsProvider credentialsProvider,
+			RequestConfig requestConfig, SSLContext sslContext) {
+		RestClient restClient = RestClient.builder(host)
             .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
                 @Override
                 public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpClientBuilder) {
@@ -87,11 +77,63 @@ public class OpenSearchConfig {
                 }
             })
             .build();
+		return restClient;
+	}
 
-        // 5. Crear cliente OpenSearch
-        return new OpenSearchClient(
-            new RestClientTransport(restClient, new JacksonJsonpMapper())
+	/**
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws KeyManagementException
+	 * @throws KeyStoreException
+	 */
+	private SSLContext getSslContext() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
+		SSLContext sslContext = SSLContextBuilder
+                .create()
+                .loadTrustMaterial((chain, authType) -> true) // Acepta cualquier certificado (¡Cuidado en producción!)
+                .build();
+		return sslContext;
+	}
+
+	/**
+	 * @return
+	 */
+	private RequestConfig getRequestConfig() {
+		RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectTimeout((int) properties.getConnectionTimeout().toMillis())
+                .setSocketTimeout((int) properties.getSocketTimeout().toMillis())
+                .setConnectionRequestTimeout((int) properties.getConnectionRequestTimeout().toMillis())
+                .build();
+		return requestConfig;
+	}
+
+	/**
+	 * @param host
+	 * @return
+	 */
+	private BasicCredentialsProvider getCredentialProvider(HttpHost host) {
+		BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(
+            new AuthScope(host),
+            new UsernamePasswordCredentials(
+                properties.getUsername(),
+                properties.getPassword()
+            )
         );
-    }
+		return credentialsProvider;
+	}
+
+	/**
+	 * @return
+	 * @throws URISyntaxException
+	 */
+	private HttpHost getHttpHost() throws URISyntaxException {
+		URI uri = new URI(properties.getUrl());
+        HttpHost host = new HttpHost(
+            uri.getHost(),
+            uri.getPort(),
+            uri.getScheme()
+        );
+		return host;
+	}
 	  
 }
