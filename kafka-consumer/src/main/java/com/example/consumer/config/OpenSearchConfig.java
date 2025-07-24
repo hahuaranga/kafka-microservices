@@ -2,10 +2,17 @@ package com.example.consumer.config;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.net.ssl.SSLContext;
+
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.opensearch.client.RestClient;
@@ -17,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.ssl.SSLContextBuilder;
 
 /**
  * Author: hahuaranga@indracompany.com
@@ -32,7 +40,7 @@ public class OpenSearchConfig {
 	private final OpenSearchProperties properties;
 	
     @Bean
-    OpenSearchClient openSearchClient() throws URISyntaxException {
+    OpenSearchClient openSearchClient() throws URISyntaxException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
         log.info("Configurando cliente OpenSearch para {}", properties.getUrl());
 
         // Configurar SSL primero
@@ -64,6 +72,12 @@ public class OpenSearchConfig {
                 .build();
 
         // 4. Construir cliente REST con configuración completa
+        SSLContext sslContext = SSLContextBuilder
+                .create()
+                .loadTrustMaterial((chain, authType) -> true) // Acepta cualquier certificado (¡Cuidado en producción!)
+                .build();
+    	
+        
         RestClient restClient = RestClient.builder(host)
             .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
                 @Override
@@ -72,7 +86,9 @@ public class OpenSearchConfig {
                         .setDefaultCredentialsProvider(credentialsProvider)
                         .setDefaultRequestConfig(requestConfig)
                         .setMaxConnPerRoute(properties.getMaxConnectionsPerRoute())
-                        .setMaxConnTotal(properties.getMaxConnectionsTotal());
+                        .setMaxConnTotal(properties.getMaxConnectionsTotal())
+                        .setSSLContext(sslContext)
+                        .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
                 }
             })
             .build();
