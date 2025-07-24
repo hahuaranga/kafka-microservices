@@ -5,9 +5,7 @@ import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-
 import javax.net.ssl.SSLContext;
-
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -42,9 +40,6 @@ public class OpenSearchConfig {
     @Bean
     OpenSearchClient openSearchClient() throws URISyntaxException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
         log.info("Configurando cliente OpenSearch para {}", properties.getUrl());
-
-        // Configurar SSL primero
-        //configureSSL();
         
         // 1. Parsear URL
         URI uri = new URI(properties.getUrl());
@@ -98,11 +93,5 @@ public class OpenSearchConfig {
             new RestClientTransport(restClient, new JacksonJsonpMapper())
         );
     }
-	
-//    private void configureSSL() {
-//        if (properties.getTruststorePath() != null && !properties.getTruststorePath().isEmpty()) {
-//            System.setProperty("javax.net.ssl.trustStore", properties.getTruststorePath());
-//            System.setProperty("javax.net.ssl.trustStorePassword", properties.getTruststorePassword());
-//        }
-//    }    
+	  
 }

@@ -24,7 +24,6 @@ import java.util.Map;
  */
 
 @Configuration
-//@EnableConfigurationProperties(KafkaProperties.class)
 @RequiredArgsConstructor
 public class KafkaConfig {
 

@@ -30,7 +30,5 @@ public class OpenSearchProperties {
     
     @DurationUnit(ChronoUnit.MILLIS)
     private Duration connectionRequestTimeout = Duration.ofSeconds(5);
-    
-//    private String truststorePath;
-//    private String truststorePassword;
+
 }
