@@ -35,6 +35,9 @@ public class OpenSearchConfig {
     OpenSearchClient openSearchClient() throws URISyntaxException {
         log.info("Configurando cliente OpenSearch para {}", properties.getUrl());
 
+        // Configurar SSL primero
+        //configureSSL();
+        
         // 1. Parsear URL
         URI uri = new URI(properties.getUrl());
         HttpHost host = new HttpHost(
@@ -80,5 +83,10 @@ public class OpenSearchConfig {
         );
     }
 	
-    
+//    private void configureSSL() {
+//        if (properties.getTruststorePath() != null && !properties.getTruststorePath().isEmpty()) {
+//            System.setProperty("javax.net.ssl.trustStore", properties.getTruststorePath());
+//            System.setProperty("javax.net.ssl.trustStorePassword", properties.getTruststorePassword());
+//        }
+//    }    
 }

@@ -29,5 +29,8 @@ public class OpenSearchProperties {
     private Duration socketTimeout = Duration.ofSeconds(10);
     
     @DurationUnit(ChronoUnit.MILLIS)
-    private Duration connectionRequestTimeout = Duration.ofSeconds(5);    
+    private Duration connectionRequestTimeout = Duration.ofSeconds(5);
+    
+//    private String truststorePath;
+//    private String truststorePassword;
 }
