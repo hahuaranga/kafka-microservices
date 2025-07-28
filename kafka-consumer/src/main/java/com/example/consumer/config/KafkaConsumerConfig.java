@@ -26,7 +26,7 @@ import java.util.Map;
 
 @Configuration
 @RequiredArgsConstructor
-public class KafkaConfig {
+public class KafkaConsumerConfig {
 
 	private final KafkaProperties kafkaProperties;
 	
@@ -35,9 +35,9 @@ public class KafkaConfig {
         Map<String, Object> configProps = new HashMap<>();
         
         // Basic configuration
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
-        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaProperties.getGroupId());
-        configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaProperties.getAutoOffsetReset());
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getConsumer().getBootstrapServers());
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaProperties.getConsumer().getGroupId());
+        configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaProperties.getConsumer().getAutoOffsetReset());
         
         // Deserializers with error handling
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
@@ -61,19 +61,28 @@ public class KafkaConfig {
 
     @Bean
     ConcurrentMessageListenerContainer<String, String> kafkaMessageListenerContainer(ConsumerFactory<String, String> consumerFactory) {
-        ContainerProperties containerProps = new ContainerProperties(kafkaProperties.getTopicName());
+        ContainerProperties containerProps = new ContainerProperties(kafkaProperties.getConsumer().getTopicName());
         containerProps.setMissingTopicsFatal(false);
 
         ConcurrentMessageListenerContainer<String, String> container =
                 new ConcurrentMessageListenerContainer<>(consumerFactory, containerProps);
-        container.setConcurrency(kafkaProperties.getConcurrency()); // 👈 aquí se define la concurrencia
+        container.setConcurrency(kafkaProperties.getConsumer().getConcurrency()); // 👈 aquí se define la concurrencia
         return container;
     }
+    
+    @Bean
+    NewTopic dlqTopic(KafkaProperties properties) {
+        return TopicBuilder.name(properties.getConsumer().getDlqTopicName())
+                .partitions(3)
+                .replicas(2)
+                .config(TopicConfig.RETENTION_MS_CONFIG, "604800000")
+                .build();
+    }    
     
     // Solo para validacion
     @Bean
     NewTopic applicationTopic(KafkaProperties properties) {
-        return TopicBuilder.name(kafkaProperties.getTopicName())
+        return TopicBuilder.name(kafkaProperties.getConsumer().getTopicName())
                           .partitions(3)
                           .replicas(2)
                           .config(TopicConfig.RETENTION_MS_CONFIG, "604800000") // 7 días

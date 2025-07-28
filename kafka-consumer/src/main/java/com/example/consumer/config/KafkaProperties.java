@@ -14,12 +14,34 @@ import lombok.Data;
 @Validated
 @ConfigurationProperties(prefix = "kafka")
 public class KafkaProperties {
-    private String bootstrapServers;
-    private String topicName;
-    private String groupId;
-    private String autoOffsetReset;
-    private SecurityProperties security;
-    private int concurrency = 1;
+	private ConsumerProperties consumer;
+	private ProducerProperties producer;
+	private SecurityProperties security;
+    
+    @Data
+    public static class ConsumerProperties {
+        private String bootstrapServers;
+        private String topicName = "example-topic";
+        private String groupId;
+        private String autoOffsetReset;
+        private SecurityProperties security;
+        private int concurrency = 1;
+        private String dlqTopicName = "dlq-topic";
+    }
+    
+    @Data
+    public static class ProducerProperties {
+    	//private String topicName = "dlq-topic";
+    	private String bootstrapServers;
+    	private String keySerializer;
+    	private String valueSerializer;
+    	private int lingerMs;
+    	private int batchSize;
+    	private int bufferMemory;
+    	private String compressionType;
+    	private String acks;
+    	private int retries;   	
+    }
 
     @Data
     public static class SecurityProperties {
