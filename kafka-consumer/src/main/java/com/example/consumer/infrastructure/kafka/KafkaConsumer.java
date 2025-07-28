@@ -2,6 +2,8 @@ package com.example.consumer.infrastructure.kafka;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
@@ -19,6 +21,8 @@ import java.util.Map;
  * File: KafkaConsumer.java
  */
 
+@Deprecated
+@Profile("legacy")
 @Slf4j
 @Component
 @RequiredArgsConstructor

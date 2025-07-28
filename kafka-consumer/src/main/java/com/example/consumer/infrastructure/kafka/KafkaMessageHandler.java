@@ -4,6 +4,8 @@ import com.example.consumer.core.domain.MessageProcessor;
 import com.example.consumer.infrastructure.input.MessageInputPort;
 import lombok.RequiredArgsConstructor;
 import java.util.Map;
+
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Component;
  * File: KafkaMessageHandler.java
  */
 
+@Deprecated
+@Profile("legacy")
 @Component
 @RequiredArgsConstructor
 public class KafkaMessageHandler implements MessageInputPort {

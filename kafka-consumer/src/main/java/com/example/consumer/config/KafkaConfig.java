@@ -8,10 +8,11 @@ import org.apache.kafka.common.config.TopicConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import lombok.RequiredArgsConstructor;
 import java.util.HashMap;
@@ -59,18 +60,14 @@ public class KafkaConfig {
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(
-        ConsumerFactory<String, String> consumerFactory) {
-        
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = 
-            new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory);
-        
-        // Additional configurations
-        factory.setConcurrency(3); // Adjust as needed
-        factory.getContainerProperties().setMissingTopicsFatal(false);
-        
-        return factory;
+    ConcurrentMessageListenerContainer<String, String> kafkaMessageListenerContainer(ConsumerFactory<String, String> consumerFactory) {
+        ContainerProperties containerProps = new ContainerProperties(kafkaProperties.getTopicName());
+        containerProps.setMissingTopicsFatal(false);
+
+        ConcurrentMessageListenerContainer<String, String> container =
+                new ConcurrentMessageListenerContainer<>(consumerFactory, containerProps);
+        container.setConcurrency(kafkaProperties.getConcurrency()); // 👈 aquí se define la concurrencia
+        return container;
     }
     
     // Solo para validacion

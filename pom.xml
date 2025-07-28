@@ -56,6 +56,15 @@
 				<artifactId>httpasyncclient</artifactId>
 				<version>4.1.5</version> <!-- Versión compatible con httpclient 4.5.x -->
 			</dependency>
+			
+            <!-- Spring Integration BOM -->
+            <dependency>
+                <groupId>org.springframework.integration</groupId>
+                <artifactId>spring-integration-bom</artifactId>
+                <version>${spring-integration.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>			
 
 		</dependencies>
 	</dependencyManagement>

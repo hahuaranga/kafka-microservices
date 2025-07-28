@@ -19,6 +19,7 @@ public class KafkaProperties {
     private String groupId;
     private String autoOffsetReset;
     private SecurityProperties security;
+    private int concurrency = 1;
 
     @Data
     public static class SecurityProperties {
