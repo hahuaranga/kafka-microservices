@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.kafka.listener.KafkaMessageListenerContainer;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.messaging.MessageChannel;
 
 /**
@@ -24,7 +24,7 @@ public class IntegrationConfig {
 	
     @Bean
     IntegrationFlow kafkaInboundFlow(
-            @Qualifier("kafkaMessageListenerContainer") KafkaMessageListenerContainer<String, String> container,
+            @Qualifier("kafkaMessageListenerContainer") ConcurrentMessageListenerContainer<String, String> container,
             @Qualifier("kafkaInputChannel") MessageChannel inputChannel) {
         return IntegrationFlow
                 .from(org.springframework.integration.kafka.dsl.Kafka
