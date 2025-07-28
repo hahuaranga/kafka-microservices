@@ -4,6 +4,7 @@ import com.example.consumer.core.domain.MessageProcessor;
 import lombok.RequiredArgsConstructor;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -18,11 +19,11 @@ import org.springframework.messaging.MessageChannel;
 @Configuration
 @RequiredArgsConstructor
 public class KafkaToOpenSearchFlow {
-
-    private final MessageChannel kafkaInputChannel;
+    
+    private final @Qualifier("kafkaInputChannel") MessageChannel kafkaInputChannel;
     
     private final MessageProcessor messageProcessor;
-
+    
     @Bean
     IntegrationFlow openSearchIndexingFlow() {
         return IntegrationFlow.from(kafkaInputChannel)
