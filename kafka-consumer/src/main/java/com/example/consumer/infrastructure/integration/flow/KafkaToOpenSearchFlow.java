@@ -24,7 +24,7 @@ public class KafkaToOpenSearchFlow {
     private final MessageProcessor messageProcessor;
 
     @Bean
-    IntegrationFlow kafkaToOpenSearchFlow() {
+    IntegrationFlow openSearchIndexingFlow() {
         return IntegrationFlow.from(kafkaInputChannel)
                 .handle(String.class, (payload, headers) -> {
                     Map<String, String> headersMap = headers.entrySet().stream()
