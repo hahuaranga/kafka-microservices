@@ -44,7 +44,7 @@ public class OpenSearchAdapter implements OpenSearchOutputPort {
                 .build();
 
             IndexResponse response = client.index(request);
-            log.info("Document indexed with id: " + response.id());
+            log.info("Document indexed sync with id: " + response.id());
         } catch (IOException | OpenSearchException e) {
             throw new RuntimeException("Failed to index document synchronously", e);
         }
@@ -63,7 +63,7 @@ public class OpenSearchAdapter implements OpenSearchOutputPort {
                     .build();
 
             IndexResponse response = client.index(request);
-            log.info("Document (with headers) indexed with id: {}", response.id());
+            log.info("Document (with headers) indexed sync with id: {}", response.id());
         } catch (IOException | OpenSearchException e) {
             throw new RuntimeException("Failed to index document with headers synchronously", e);
         }    	
