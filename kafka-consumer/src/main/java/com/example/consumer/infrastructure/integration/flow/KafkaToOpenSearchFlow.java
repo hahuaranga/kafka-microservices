@@ -53,9 +53,9 @@ public class KafkaToOpenSearchFlow {
     
     @Bean
     IntegrationFlow openSearchIndexingAsyncFlow() {
-    	log.debug("Executing openSearchIndexingAsyncFlow ...");
+        log.debug("Executing openSearchIndexingAsyncFlow ...");
         return IntegrationFlow.from(kafkaInputChannelAsync)
-                .transform(String.class, payload -> payload) // payload es String
+                .transform(String.class, payload -> payload)
                 .handle(String.class, (payload, headers) -> {
                     Map<String, String> headersMap = headers.entrySet().stream()
                             .collect(Collectors.toMap(
@@ -63,12 +63,14 @@ public class KafkaToOpenSearchFlow {
                                     e -> e.getValue() != null ? e.getValue().toString() : null
                             ));
 
+                    // 1. Lanzamos el futuro tal cual
+                    // 2. Si falla, Spring Integration catapulta la excepción al errorChannel
                     return Mono.fromCompletionStage(
                             messageProcessor.asyncHandleMessageWithMetadata(payload, headersMap)
-                    ).onErrorMap(ex -> new RuntimeException("Falló indexación async", ex));
+                    );
                 })
                 .channel("errorChannel")
                 .get();
-    }  
+    } 
     
 }
