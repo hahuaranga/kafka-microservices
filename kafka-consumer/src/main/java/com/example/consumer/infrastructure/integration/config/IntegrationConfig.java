@@ -19,9 +19,14 @@ import org.springframework.messaging.MessageChannel;
 public class IntegrationConfig {
 	
 	@Bean
-	MessageChannel kafkaInputChannel() {
+	MessageChannel kafkaInputChannelSync() {
 	    return new DirectChannel();
 	}	
+	
+	@Bean
+	MessageChannel kafkaInputChannelAsync() {
+	    return new DirectChannel();
+	}
 	
     @Bean
     IntegrationFlow kafkaInboundFlow(
