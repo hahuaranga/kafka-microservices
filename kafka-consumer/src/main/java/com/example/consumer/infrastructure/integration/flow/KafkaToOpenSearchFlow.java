@@ -74,5 +74,5 @@ public class KafkaToOpenSearchFlow {
                 .channel("errorChannel")
                 .get();
     } 
-    
+
 }
