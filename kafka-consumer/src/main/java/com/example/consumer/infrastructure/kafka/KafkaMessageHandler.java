@@ -24,11 +24,11 @@ public class KafkaMessageHandler implements MessageInputPort {
 
     @Override
     public void process(String message) {
-        messageProcessor.handleMessage(message);
+        messageProcessor.syncHandleMessage(message);
     }
     
     public void processWithMetadata(String payload, Map<String, String> headers) {
-    	messageProcessor.handleMessageWithMetadata(payload, headers);
+    	messageProcessor.syncHandleMessageWithMetadata(payload, headers);
     }
     
 }

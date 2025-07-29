@@ -6,6 +6,7 @@ import org.opensearch.client.opensearch.core.IndexRequest;
 import org.opensearch.client.opensearch.core.IndexResponse;
 import org.opensearch.client.opensearch.indices.CreateIndexRequest;
 import org.opensearch.client.opensearch.indices.ExistsRequest;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import com.example.consumer.config.OpenSearchProperties;
 import com.example.consumer.core.port.OpenSearchOutputPort;
@@ -30,6 +31,8 @@ public class OpenSearchAdapter implements OpenSearchOutputPort {
     private final OpenSearchClient client;
     
     private final OpenSearchProperties properties;
+    
+    private final TaskExecutor openSearchExecutor;
 
     @Override
     public void indexSync(String message) {
@@ -48,9 +51,29 @@ public class OpenSearchAdapter implements OpenSearchOutputPort {
     }
     
     @Override
-    public void indexAsync(String message) {
-    	log.debug("Processing indexAsync ...");
-        CompletableFuture.runAsync(() -> {
+    public void indexSync(String message, Map<String, String> headers) {
+    	log.debug("Processing indexSync with metadata ...");
+        try {
+            Map<String, String> doc = createDocument(message);
+            doc.putAll(headers);           // agrega los headers al documento
+
+            IndexRequest<Map<String, String>> request = new IndexRequest.Builder<Map<String, String>>()
+                    .index(properties.getIndexName())
+                    .document(doc)
+                    .build();
+
+            IndexResponse response = client.index(request);
+            log.info("Document (with headers) indexed with id: {}", response.id());
+        } catch (IOException | OpenSearchException e) {
+            throw new RuntimeException("Failed to index document with headers synchronously", e);
+        }    	
+    }
+    
+    @Override
+    public CompletableFuture<IndexResponse> indexAsync(String message) {
+        log.debug("Processing indexAsync ...");
+
+        return CompletableFuture.supplyAsync(() -> {
             try {
                 IndexRequest<Map<String, String>> request = new IndexRequest.Builder<Map<String, String>>()
                     .index(properties.getIndexName())
@@ -58,12 +81,39 @@ public class OpenSearchAdapter implements OpenSearchOutputPort {
                     .build();
 
                 IndexResponse response = client.index(request);
-                log.info("Document indexed async with id: " + response.id());
+                log.info("Document indexed async with id: {}", response.id());
+                return response;
             } catch (IOException | OpenSearchException e) {
-            	log.error("Failed to index document asynchronously: " + e.getMessage());
+                log.error("Failed to index document asynchronously: {}", e.getMessage());
+                throw new RuntimeException("Async index failed", e);
             }
-        });
+        }, openSearchExecutor);
     }
+    
+    @Override
+    public CompletableFuture<IndexResponse> indexAsync(String message, Map<String, String> headers) {
+    	log.debug("Processing indexAsync with metadata ...");
+        
+    	return CompletableFuture.supplyAsync(() -> {
+            try {
+                Map<String, String> doc = createDocument(message);
+                doc.putAll(headers);       // agrega los headers al documento
+
+                IndexRequest<Map<String, String>> request = new IndexRequest.Builder<Map<String, String>>()
+                        .index(properties.getIndexName())
+                        .document(doc)
+                        .build();
+
+                IndexResponse response = client.index(request);
+                log.info("Document (with headers) indexed async with id: {}", response.id());
+                return response;
+            } catch (IOException | OpenSearchException e) {
+                log.error("Failed to index document with headers asynchronously: {}", e.getMessage());
+                throw new RuntimeException("Async index with headers failed", e);
+            }
+        }, openSearchExecutor);
+
+    }    
     
     @Override
     public void createIndexIfNotExists() {
