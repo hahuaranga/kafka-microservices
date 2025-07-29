@@ -63,7 +63,9 @@ public class KafkaConsumerConfig {
     ConcurrentMessageListenerContainer<String, String> kafkaMessageListenerContainer(ConsumerFactory<String, String> consumerFactory) {
         ContainerProperties containerProps = new ContainerProperties(kafkaProperties.getConsumer().getTopicName());
         containerProps.setMissingTopicsFatal(false);
-
+        // default containerProps
+        // pollTimeout	1_000 ms	Espera 1 s por cada poll() antes de volver a intentar.
+        // idleBetweenPolls	0 ms	Sin pausa entre polls si hay mensajes.
         ConcurrentMessageListenerContainer<String, String> container =
                 new ConcurrentMessageListenerContainer<>(consumerFactory, containerProps);
         container.setConcurrency(kafkaProperties.getConsumer().getConcurrency()); // 👈 aquí se define la concurrencia

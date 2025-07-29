@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -67,6 +68,7 @@ public class KafkaToOpenSearchFlow {
                     // 2. Si falla, Spring Integration catapulta la excepción al errorChannel
                     return Mono.fromCompletionStage(
                             messageProcessor.asyncHandleMessageWithMetadata(payload, headersMap)
+                            .orTimeout(5, TimeUnit.SECONDS)
                     );
                 })
                 .channel("errorChannel")
