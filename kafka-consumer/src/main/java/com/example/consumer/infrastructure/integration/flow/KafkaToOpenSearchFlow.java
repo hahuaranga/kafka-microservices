@@ -31,7 +31,7 @@ public class KafkaToOpenSearchFlow {
         
     @Bean
     IntegrationFlow openSearchIndexingSyncFlow() {
-    	log.debug("");
+    	log.debug("Executing openSearchIndexingSyncFlow ...");
         return IntegrationFlow.from(kafkaInputChannelSync)
                 .handle(String.class, (payload, headers) -> {
                     try {
@@ -53,6 +53,7 @@ public class KafkaToOpenSearchFlow {
     
     @Bean
     IntegrationFlow openSearchIndexingAsyncFlow() {
+    	log.debug("Executing openSearchIndexingAsyncFlow ...");
         return IntegrationFlow.from(kafkaInputChannelAsync)
                 .transform(String.class, payload -> payload) // payload es String
                 .handle(String.class, (payload, headers) -> {
