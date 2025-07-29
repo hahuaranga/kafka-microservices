@@ -31,6 +31,7 @@ public class KafkaToOpenSearchFlow {
         
     @Bean
     IntegrationFlow openSearchIndexingSyncFlow() {
+    	log.debug("");
         return IntegrationFlow.from(kafkaInputChannelSync)
                 .handle(String.class, (payload, headers) -> {
                     try {
@@ -39,9 +40,7 @@ public class KafkaToOpenSearchFlow {
 						            Map.Entry::getKey,
 						            e -> e.getValue() != null ? e.getValue().toString() : null
 						        ));
-
-						messageProcessor.syncHandleMessageWithMetadata(payload, headersMap);
-						//CompletableFuture<IndexResponse> x = messageProcessor.asyncHandleMessageWithMetadata(payload, headersMap); 
+						messageProcessor.syncHandleMessageWithMetadata(payload, headersMap); 
 						return null;
 					} catch (Exception e) {
 	                    log.error("Error al indexar sync: {}", e.getMessage());
