@@ -31,7 +31,7 @@ public class IntegrationConfig {
     @Bean
     IntegrationFlow kafkaInboundFlow(
             @Qualifier("kafkaMessageListenerContainer") ConcurrentMessageListenerContainer<String, String> container,
-            @Qualifier("kafkaInputChannelSync") MessageChannel inputChannel) {
+            @Qualifier("kafkaInputChannelAsync") MessageChannel inputChannel) {
         return IntegrationFlow
                 .from(Kafka
                         .messageDrivenChannelAdapter(container)
