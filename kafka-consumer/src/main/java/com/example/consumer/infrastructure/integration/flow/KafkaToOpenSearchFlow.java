@@ -24,33 +24,33 @@ import org.springframework.messaging.MessageChannel;
 @RequiredArgsConstructor
 public class KafkaToOpenSearchFlow {
     
-    private final @Qualifier("kafkaInputChannelSync") MessageChannel kafkaInputChannelSync;
+//    private final @Qualifier("kafkaInputChannelSync") MessageChannel kafkaInputChannelSync;
     
     private final @Qualifier("kafkaInputChannelAsync") MessageChannel kafkaInputChannelAsync;
     
     private final MessageProcessor messageProcessor;
         
-    @Bean
-    IntegrationFlow openSearchIndexingSyncFlow() {
-    	log.debug("Executing openSearchIndexingSyncFlow ...");
-        return IntegrationFlow.from(kafkaInputChannelSync)
-                .handle(String.class, (payload, headers) -> {
-                    try {
-						Map<String, String> headersMap = headers.entrySet().stream()
-						        .collect(Collectors.toMap(
-						            Map.Entry::getKey,
-						            e -> e.getValue() != null ? e.getValue().toString() : null
-						        ));
-						messageProcessor.syncHandleMessageWithMetadata(payload, headersMap); 
-						return null;
-					} catch (Exception e) {
-	                    log.error("Error al indexar sync: {}", e.getMessage());
-	                    throw new RuntimeException("Falló indexación sync", e);
-					}
-                })
-                .channel("errorChannel") // Redirige al canal de errores
-                .get();
-    }
+//    @Bean
+//    IntegrationFlow openSearchIndexingSyncFlow() {
+//    	log.debug("Executing openSearchIndexingSyncFlow ...");
+//        return IntegrationFlow.from(kafkaInputChannelSync)
+//                .handle(String.class, (payload, headers) -> {
+//                    try {
+//						Map<String, String> headersMap = headers.entrySet().stream()
+//						        .collect(Collectors.toMap(
+//						            Map.Entry::getKey,
+//						            e -> e.getValue() != null ? e.getValue().toString() : null
+//						        ));
+//						messageProcessor.syncHandleMessageWithMetadata(payload, headersMap); 
+//						return null;
+//					} catch (Exception e) {
+//	                    log.error("Error al indexar sync: {}", e.getMessage());
+//	                    throw new RuntimeException("Falló indexación sync", e);
+//					}
+//                })
+//                .channel("errorChannel") // Redirige al canal de errores
+//                .get();
+//    }
     
     @Bean
     IntegrationFlow openSearchIndexingAsyncFlow() {
